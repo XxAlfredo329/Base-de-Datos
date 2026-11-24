@@ -8,7 +8,11 @@ app = Flask(__name__)
 # Establecer la clave secreta para la sesión.
 app.secret_key = 'my_top_secret_123'
 # Estableciendo conexión SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///diary.db'
+db_url = os.environ.get('DATABASE_URL')
+if db_url and db_url.startswith('postgres://'):
+    db_url = db_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Creando la DB
 db = SQLAlchemy(app)
@@ -117,3 +121,6 @@ def form_create():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    
+    with app.app_context():
+    db.create_all()
